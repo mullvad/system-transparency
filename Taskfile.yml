@@ -32,6 +32,7 @@ includes:
   go: ./tasks/go.yml
   deps: ./tasks/deps.yml
   demo: ./tasks/demo.yml
+  linux: ./tasks/linux.yml
 
 output: 'prefixed'
 
