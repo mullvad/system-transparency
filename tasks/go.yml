@@ -9,10 +9,12 @@ vars:
   STMGR_DEFAULT_VERSION: 1c1394b
   CPU_REPO: github.com/u-root/cpu
   CPU_DEFAULT_VERSION: a901912
+  MPT_REPO: github.com/mullvad/mpt-priv
+  MPT_DEFAULT_VERSION: c6fb6693a43e
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
-  GOPREFIX: GOPATH={{.GOPATH}}
+  GOPREFIX: GOPATH={{.GOPATH}} GOPRIVATE='github.com/mullvad*'
 
 tasks:
 
@@ -83,11 +85,13 @@ tasks:
       - task
       - u-root
       - stmgr
+      - mpt
     # checkout sequentially
     cmds:
       - task: checkout-cpu
       - task: checkout-uroot
       - task: checkout-stboot
+      - task: checkout-mpt
 
   update:
     cmds:
@@ -153,6 +157,15 @@ tasks:
           else
           echo {{.CPU_DEFAULT_VERSION}}
           fi
+
+  mpt:
+    cmds:
+      - task: install
+        vars:
+          NAME: mpt
+          PACKAGE: "{{.MPT_REPO}}"
+          VERSION: "{{.MPT_DEFAULT_VERSION}}"
+    run: once
 
   debos:
     cmds:
@@ -224,6 +237,14 @@ tasks:
           else
           echo {{.STBOOT_DEFAULT_VERSION}}
           fi
+
+  checkout-mpt:
+    cmds:
+      - task: :go:checkout
+        vars:
+          REPO: "{{.MPT_REPO}}"
+          BRANCH: "{{.MPT_DEFAULT_VERSION}}"
+    run: once
 
   clean:
     cmds:
