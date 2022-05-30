@@ -4,6 +4,7 @@ vars:
   INITRAMFS_INCLUDE: contrib/initramfs-includes
   PROVISIONING_INITRC: out/artifacts/proviso.elv
   MPTISO_INITRC: out/artifacts/mpt.elv
+  MPTISOTEST_INITRC: out/artifacts/mpt-test.elv
   # WORKAROUND: remove kexec and sluinit from core pkgs to prevent build errors
   UROOT_CORE_PKGS: "{{.UROOT_REPO}}/cmds/core/{basename,bind,blkid,cat,chmod,chroot,cmp,comm,cp,cpio,date,dd,df,dhclient,dirname,dmesg,echo,elvish,false,find,free,fusermount,gpgv,gpt,grep,gzip,hexdump,hostname,hwclock,id,init,insmod,io,ip,kill,lddfiles,ln,lockmsrs,losetup,ls,lsdrivers,lsmod,man,md5sum,mkdir,mkfifo,mknod,mktemp,more,mount,msr,mv,netcat,ntpdate,pci,ping,printenv,ps,pwd,readlink,rm,rmmod,rsdp,scp,seq,shasum,shutdown,sleep,sort,sshd,strace,strings,stty,switch_root,sync,tail,tar,tee,tr,true,truncate,ts,umount,uname,uniq,unmount,unshare,uptime,watchdog,watchdogd,wc,wget,which,yes}"
 
@@ -278,3 +279,55 @@ tasks:
         {{.MPTISO_INITRC}}:.elvish/rc.elv
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
+
+  mptisotest-initrc:
+    generates:
+      - "{{.MPTISOTEST_INITRC}}"
+    cmds:
+      - cmd: mkdir -p out/artifacts
+        silent: true
+      - |-
+        cat > "{{.MPTISOTEST_INITRC}}" <<EOL
+        mount -t efivarfs none /sys/firmware/efi/efivars
+        echo Call mpt blabla here
+        EOL
+    status:
+      - "[ -f {{.MPTISOTEST_INITRC}} ]"
+
+  mptisotest-initramfs:
+    desc: "Build compressed mpt test initramfs"
+    deps:
+      - :check-config
+      - :go:u-root
+      - :go:mpt
+      - :go:checkout-uroot
+      - mptisotest-initrc
+    sources:
+      - ./cache/go/bin/mpt-priv
+      - ./{{.MPTISOTEST_INITRC}}
+    generates:
+      - "{{.MPTISOTEST_INITRAMFS}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.MPTISOTEST_INITRAMFS}})
+        silent: true
+      - >
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
+      - gzip -kf {{.INITRAMFS}}
+    env:
+      GO111MODULE: off
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: "task bug: INITRAMFS not defined"
+    run: once
+    vars:
+      INITRAMFS:
+        sh: echo {{.MPTISOTEST_INITRAMFS}} | sed -e 's/\.gz//'
+      PKGS_ARGS: >-
+        core
+      FILES: >-
+        cache/go/bin/mpt-priv:/bin/mpt
+        {{.MPTISOTEST_INITRC}}:.elvish/rc.elv
+      FILES_ARGS:
+        sh: for f in {{.FILES}}; do echo -n "-files $f "; done
+        
