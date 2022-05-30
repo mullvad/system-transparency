@@ -8,6 +8,7 @@ vars:
   DISK: out/stboot.img
   PROVISO: out/prov.iso
   MPTISO: out/mpt.iso
+  MPTISO_TEST: out/mpt-test.iso
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
   BOOT_PART: out/artifacts/boot_partition.vfat
@@ -17,6 +18,7 @@ vars:
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
   MPTISO_INITRAMFS: out/artifacts/mptiso.cpio.gz
+  MPTISOTEST_INITRAMFS: out/artifacts/mptisotest.cpio.gz
   SECURITY_CONFIG: out/artifacts/security_configuration.json
   # cpu ssh keys
   CPUKEYS_DIR: out/keys/cpu_keys
@@ -212,6 +214,34 @@ tasks:
     vars:
       ISO_DIR: cache/mptiso
       MPTISO_FAT: ./{{.ISO_DIR}}/mptiso.fat
+      # TODO: Calculate size
+      BLOCKS:
+        sh: echo $((1<<16))
+
+  mptiso-test:
+    desc: Build mpt test iso image
+    deps:
+      - check-config
+      - task: linux:kernel
+        vars:
+          IMAGE: "{{.MPTISO_LINUX_IMAGE}}"
+          INITRAMFS: "{{.MPTISOTEST_INITRAMFS}}"
+          INITRAMFS_TARGET: "stboot:mptisotest-initramfs"
+    sources:
+      - ./{{.MPTISO_LINUX_IMAGE}}
+    generates:
+      - ./{{.MPTISO_TEST}}
+    cmds:
+      - rm -rf {{.MPTISO_FAT}}
+      - mkdir -p {{.ISO_DIR}}
+      - mkfs.vfat -C -n MPTISO {{.MPTISO_FAT}} {{.BLOCKS}}
+      - mmd -i {{.MPTISO_FAT}} ::/EFI
+      - mmd -i {{.MPTISO_FAT}} ::/EFI/BOOT
+      - mcopy -i {{.MPTISO_FAT}} {{.MPTISO_LINUX_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
+      - xorriso -as mkisofs -R -f -e mptiso-test.fat -no-emul-boot -o {{.MPTISO_TEST}} {{.ISO_DIR}}
+    vars:
+      ISO_DIR: cache/mptiso-test
+      MPTISO_FAT: ./{{.ISO_DIR}}/mptiso-test.fat
       # TODO: Calculate size
       BLOCKS:
         sh: echo $((1<<16))
