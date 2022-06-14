@@ -91,7 +91,6 @@ tasks:
       - task: checkout-cpu
       - task: checkout-uroot
       - task: checkout-stboot
-      - task: checkout-mpt
 
   update:
     cmds:
@@ -237,14 +236,6 @@ tasks:
           else
           echo {{.STBOOT_DEFAULT_VERSION}}
           fi
-
-  checkout-mpt:
-    cmds:
-      - task: :go:checkout
-        vars:
-          REPO: "{{.MPT_REPO}}"
-          BRANCH: "{{.MPT_DEFAULT_VERSION}}"
-    run: once
 
   clean:
     cmds:
