@@ -10,7 +10,6 @@ vars:
   CPU_REPO: github.com/u-root/cpu
   CPU_DEFAULT_VERSION: a901912
   MPT_REPO: github.com/mullvad/mpt-priv
-  MPT_DEFAULT_VERSION: c6fb6693a43e
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -163,7 +162,6 @@ tasks:
         vars:
           NAME: mpt
           PACKAGE: "{{.MPT_REPO}}"
-          VERSION: "{{.MPT_DEFAULT_VERSION}}"
     run: once
 
   debos:
