@@ -267,6 +267,7 @@ tasks:
         silent: true
       - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - gzip -kf {{.INITRAMFS}}
     env:
@@ -318,6 +319,7 @@ tasks:
         silent: true
       - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - gzip -kf {{.INITRAMFS}}
     env:
