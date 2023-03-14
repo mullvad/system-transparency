@@ -284,6 +284,7 @@ tasks:
       FILES: >-
         cache/go/bin/mpt-priv:/bin/mpt
         {{.MPTISO_INITRC}}:.elvish/rc.elv
+        ../../firmware/firmware-bnx2x/lib/firmware/bnx2x/:/lib/firmware/
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
 
