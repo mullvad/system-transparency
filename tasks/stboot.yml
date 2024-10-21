@@ -84,6 +84,7 @@ tasks:
               ;;
           esac
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
+      HTTPS_ROOT_SECTIGO: contrib/initramfs-includes/https_roots_sectigo.pem
       FILE_HOST_CONFIG:
         sh: >-
           [ "{{.ST_HOST_CONFIG_MODE}}" != "initramfs" ] ||
@@ -93,6 +94,7 @@ tasks:
         {{.SECURITY_CONFIG}}:etc/security_configuration.json
         {{.ST_SIGNING_ROOT}}:etc/ospkg_signing_root.pem
         {{.HTTPS_ROOT}}:etc/https_roots.pem
+        {{.HTTPS_ROOT_SECTIGO}}:etc/https_roots_sectigo.pem
         {{.FILES}}
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
